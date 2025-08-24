@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OAK Candles | Hand‑poured Scented Candles</title>
+  <meta name="description" content="OAK Candles – small-batch, hand‑poured scented candles. Browse scents, feel the vibe, and order quickly on WhatsApp." />
+  <meta name="theme-color" content="#0e0d0d" />
+
+  <!--
+    ✨ HOW TO USE (T, READ THIS):
+    1) Put your 11 images into /img/ as candle01.jpg ... candle11.jpg (any names are fine—just edit the list below in JS).
+    2) Change WHATSAPP_NUMBER to your friend’s phone (international format, e.g., 2567XXXXXXXX for Uganda).
+    3) Optional: Fill in the price fields in the candles[] list (or leave blank for now; the UI will show “—”).
+    4) Optional: Edit Instagram link in the Contact section.
+  -->
+
+  <style>
+    /* =========================
+       OAK Candles – Styles
+       Single‑file for easy copy/paste
+       ========================= */
+    :root{
+      --bg: #0e0d0d;
+      --bg-soft: #151414;
+      --text: #f6f6f6;
+      --muted: #b8b8b8;
+      --accent: #d4af37; /* warm gold */
+      --accent-2: #ffecd1; /* candle glow */
+      --card: #171616;
+      --border: #262525;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --container: 1150px;
+    }
+    [data-theme="light"]{
+      --bg: #fffdf8;
+      --bg-soft: #fff8ee;
+      --text: #141414;
+      --muted: #5b5b5b;
+      --card: #ffffff;
+      --border: #eee6d9;
+      --shadow: 0 10px 30px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans";
+      background:var(--bg); color:var(--text);
+    }
+    a{color:inherit; text-decoration:none}
+    img{display:block; max-width:100%; height:auto}
+    .container{max-width:var(--container); margin-inline:auto; padding:0 20px}
+
+    /* Header */
+    header{
+      position:sticky; top:0; z-index:50;
+      backdrop-filter: blur(8px);
+      background: color-mix(in oklab, var(--bg) 85%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav{display:flex; align-items:center; justify-content:space-between; height:64px}
+    .brand{display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.5px}
+    .logo{
+      width:34px; height:34px; border-radius:50%;
+      background: radial-gradient(circle at 30% 30%, var(--accent-2), var(--accent) 60%, transparent 61%),
+                  conic-gradient(from 200deg, #0000 0 70deg, rgba(0,0,0,.25) 71deg 360deg);
+      border:1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .tagline{font-size:12px; color:var(--muted); margin-left:8px}
+    .nav a{opacity:.9}
+    .nav-links{display:flex; gap:18px; align-items:center}
+    .btn{
+      border:1px solid var(--border); padding:10px 14px; border-radius:999px; display:inline-flex; align-items:center; gap:8px;
+      background:linear-gradient(180deg, color-mix(in oklab, var(--card) 88%, transparent), var(--card));
+      box-shadow: var(--shadow);
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .ghost{background:transparent}
+    .accent{border-color:color-mix(in oklab, var(--accent) 50%, var(--border));}
+
+    /* Progress bar */
+    .progress{position:fixed; top:0; left:0; height:3px; width:0; background:linear-gradient(90deg, var(--accent), var(--accent-2)); z-index:60}
+
+    /* Hero */
+    .hero{
+      position:relative; min-height:72svh; display:grid; place-items:center; overflow:hidden;
+      border-bottom:1px solid var(--border);
+      background:
+        radial-gradient(1200px 500px at 50% 110%, color-mix(in oklab, var(--accent-2) 10%, transparent), transparent),
+        linear-gradient(180deg, color-mix(in oklab, #000 30%, transparent), transparent 30%),
+        url('img/hero.jpg') center/cover no-repeat; /* <- replace with your best banner image (optional) */
+    }
+    .hero-inner{padding:90px 20px; text-align:center}
+    .headline{font-size: clamp(36px, 6vw, 64px); line-height:1.05; letter-spacing:.2px; margin:0 0 10px}
+    .slogan{font-size: clamp(16px, 2vw, 22px); color:var(--accent-2); letter-spacing:.5px; text-transform:uppercase; opacity:.9; margin:0 0 16px}
+    .sub{max-width:780px; margin:0 auto 26px; color:var(--muted); font-size: clamp(16px, 1.8vw, 18px)}
+    .cta{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+
+    /* Section */
+    section{padding:64px 0}
+    .section-head{display:flex; align-items:flex-end; justify-content:space-between; gap:16px; margin-bottom:18px}
+    .section-title{font-size: clamp(24px, 3vw, 32px); margin:0}
+    .section-sub{color:var(--muted)}
+
+    /* Filters */
+    .filters{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{padding:8px 12px; border-radius:999px; border:1px solid var(--border); cursor:pointer; user-select:none}
+    .chip[aria-pressed="true"]{background: color-mix(in oklab, var(--accent) 18%, transparent); border-color: color-mix(in oklab, var(--accent) 55%, var(--border));}
+
+    /* Gallery */
+    .grid{display:grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); gap:14px}
+    .card{
+      background:var(--card); padding:10px; border-radius:var(--radius); border:1px solid var(--border); overflow:hidden; position:relative;
+      opacity:0; transform:translateY(10px); transition:opacity .4s ease, transform .4s ease;
+    }
+    .card.revealed{opacity:1; transform:none}
+    .thumb{aspect-ratio: 4/5; border-radius:12px; overflow:hidden}
+    .thumb img{width:100%; height:100%; object-fit:cover; filter:saturate(.95) contrast(1.05)}
+    .meta{padding:10px 6px 4px}
+    .name{font-weight:600}
+    .price{font-size:13px; color:var(--muted)}
+    .card-actions{display:flex; justify-content:space-between; align-items:center; padding:6px 6px 10px}
+    .tag{font-size:12px; color:var(--muted)}
+
+    /* About */
+    .about{display:grid; grid-template-columns: 1.1fr 1fr; gap:26px}
+    .about p{color:var(--muted)}
+    .about .panel{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px}
+    @media (max-width: 860px){.about{grid-template-columns:1fr}}
+
+    /* Contact */
+    .contact{display:grid; grid-template-columns: 1fr 1fr; gap:20px}
+    .contact .card{opacity:1; transform:none}
+    @media (max-width: 800px){.contact{grid-template-columns:1fr}}
+
+    /* Lightbox */
+    .lightbox{
+      position:fixed; inset:0; background:rgba(0,0,0,.75);
+      display:none; align-items:center; justify-content:center; padding:20px; z-index:80;
+    }
+    .lightbox.open{display:flex}
+    .lightbox-inner{position:relative; max-width:min(1000px, 95vw); max-height:90vh}
+    .lightbox img{width:100%; height:auto; border-radius:12px; box-shadow: var(--shadow)}
+    .lightbox .close, .lightbox .arrow{position:absolute; top:10px; background:rgba(0,0,0,.45); border:1px solid rgba(255,255,255,.15); color:#fff; padding:8px 10px; border-radius:999px; cursor:pointer}
+    .lightbox .close{right:10px}
+    .lightbox .arrow{top:50%; transform:translateY(-50%)}
+    .lightbox .prev{left:-18px}
+    .lightbox .next{right:-18px}
+
+    /* Floating WhatsApp */
+    .fab{
+      position:fixed; bottom:18px; right:18px; z-index:70; border-radius:999px; padding:12px 16px; display:flex; align-items:center; gap:10px;
+      background:linear-gradient(180deg, #25D366, #128C7E); color:white; box-shadow: var(--shadow);
+    }
+
+    /* Random Quotes */
+    .quote-floater{
+      position:fixed; left:50%; transform:translateX(-50%);
+      bottom:22px; z-index:65; max-width:min(800px, 92vw);
+      background: color-mix(in oklab, var(--bg-soft) 90%, transparent);
+      border: 1px solid var(--border); border-radius:999px; padding:10px 16px;
+      box-shadow: var(--shadow); color: var(--muted); text-align:center; opacity:0; transition: opacity .6s ease;
+      pointer-events:none; /* let clicks through */
+    }
+    .quote-floater.show{opacity:1}
+
+    /* Footer */
+    footer{padding:36px 0; border-top:1px solid var(--border); color:var(--muted); text-align:center}
+    footer .slogan-mini{display:block; margin-top:6px; color:var(--accent-2)}
+
+    /* Utility */
+    .hide{display:none !important}
+  </style>
+</head>
+<body>
+  <!-- Scroll progress -->
+  <div class="progress" id="progress"></div>
+
+  <!-- Header / Nav -->
+  <header>
+    <div class="container nav">
+      <a href="#" class="brand" aria-label="OAK Candles Home">
+        <span class="logo" aria-hidden="true"></span>
+        <span>OAK Candles</span>
+        <span class="tagline">Spark Joy, Spark Light</span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#scents">Scents</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <button id="themeToggle" class="btn ghost" aria-pressed="false" title="Toggle theme">🕯️ Theme</button>
+        <a class="btn accent" id="whatsCTA" href="#contact">Order</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero" id="home" aria-label="Hero">
+    <div class="hero-inner container">
+      <h1 class="headline">Hand‑poured. Cozy glow. OAK Candles.</h1>
+      <p class="slogan">Spark Joy, Spark Light</p>
+      <p class="sub">Small‑batch scented candles crafted with love. Scroll through our vibe, pick your scent, and order in a tap.</p>
+      <div class="cta">
+        <a href="#scents" class="btn accent">Browse Scents</a>
+        <a href="#contact" class="btn">Talk to Us</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Scents / Gallery -->
+  <section id="scents" class="container">
+    <div class="section-head">
+      <div>
+        <h2 class="section-title">Our Scents</h2>
+        <p class="section-sub">Tap a photo to zoom. Filter by mood.</p>
+      </div>
+      <div class="filters" role="toolbar" aria-label="Filters">
+        <button class="chip" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" data-filter="Floral">Floral</button>
+        <button class="chip" data-filter="Warm">Warm</button>
+        <button class="chip" data-filter="Fresh">Fresh</button>
+        <button class="chip" data-filter="Fruity">Fruity</button>
+      </div>
+    </div>
+
+    <div class="grid" id="grid" aria-live="polite"></div>
+  </section>
+
+  <!-- About -->
+  <section id="about" class="container">
+    <div class="section-head">
+      <h2 class="section-title">About OAK</h2>
+    </div>
+    <div class="about">
+      <div class="panel">
+        <h3 style="margin-top:0">My Story</h3>
+        <p>OAK Candles started with a love for cozy evenings and gentle aromas. I craft my candles in small batches, focusing on clean burn, long‑lasting scent, and elegant minimal design that fits any space.These 
+           candles are handcrafted to create an ambiance and emotional sense with light. 
+        </p>
+        <p class="muted">Wax: Soy/Beeswax blend • Wicks: Cotton • Vessels: Reusable</p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-top:0">Care Tips</h3>
+        <ul>
+          <li>Ensure that the candle is placed away from edges of surfaces.</li>
+          <li>In the presence of children, ensure supervsion.</li>
+          <li>Keep away from drafts & surfaces that overheat.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact / Order -->
+  <section id="contact" class="container">
+    <div class="section-head">
+      <h2 class="section-title">Order & Contact</h2>
+      <p class="section-sub">Prefer DMs? Tap a button.</p>
+    </div>
+    <div class="contact">
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div>
+            <h3 style="margin:6px 0 6px">WhatsApp</h3>
+            <p class="muted">Instant chat to order or ask about custom scents.</p>
+          </div>
+          <a id="waLink" class="btn accent" href="#" target="_blank" rel="noopener">Open WhatsApp</a>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between">
+          <div>
+            <h3 style="margin:6px 0 6px">Instagram</h3>
+            <p class="muted">See new drops, behind‑the‑scenes, and restocks.</p>
+          </div>
+          <a id="igLink" class="btn" href="#" target="_blank" rel="noopener">Visit Instagram</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">© <span id="year"></span> OAK Candles. Hand‑poured with love.
+      <span class="slogan-mini">Spark Joy, Spark Light</span>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" aria-modal="true" role="dialog">
+    <div class="lightbox-inner">
+      <img id="lightboxImg" alt="OAK Candle preview" />
+      <button class="close" id="closeLightbox" aria-label="Close">✕</button>
+      <button class="arrow prev" id="prevImg" aria-label="Previous">◀</button>
+      <button class="arrow next" id="nextImg" aria-label="Next">▶</button>
+    </div>
+  </div>
+
+  <!-- Floating WhatsApp Quick Order -->
+  <a class="fab" id="fab" href="#" target="_blank" rel="noopener">WhatsApp Us</a>
+
+  <!-- Random Quote Floater -->
+  <div class="quote-floater" id="quoteFloater" aria-live="polite"></div>
+
+  <script>
+    // ===========================
+    // CONFIG: Edit these for your brand
+    // ===========================
+    const WHATSAPP_NUMBER = '256707707827'; // <- replace with real number in international format
+    const INSTAGRAM_URL = 'https://instagram.com/Oak_candles'; // <- replace
+
+    // GALLERY DATA: Update file paths, names, tags, and prices as needed
+    const candles = [
+      { name: 'Strawberry Bliss',   file: 'img/IMG-20250813-WA0013.jpg', tags: ['Floral','Fresh'],   price: 'UGX 19,000' },
+      { name: 'Lavender Amber',    file: 'img/IMG-20250813-WA0014.jpg', tags: ['Warm'],            price: 'UGX 25,000' },
+      { name: 'Citronella fresh',   file: 'img/IMG-20250813-WA0015.jpg', tags: ['Fresh','Fruity'],  price: 'UGX 25,000' },
+      { name: 'Peppermint fresh',      file: 'img/IMG-20250813-WA0016.jpg', tags: ['Floral'],          price: 'UGX 25,000' },
+      { name: 'Matte touch',      file: 'img/IMG-20250813-WA0017.jpg', tags: ['Warm'],            price: 'UGX 20,000' },
+      { name: 'Coffee nectar',     file: 'img/IMG-20250813-WA0018.jpg', tags: ['Cozy'],           price: 'UGX 20,000' },
+      { name: 'Vanilla scent',     file: 'img/IMG-20250813-WA0019.jpg', tags: ['Fruity','Fresh'],  price: 'UGX 25,000' },
+      { name: 'Cinnamon ',       file: 'img/IMG-20250813-WA0020.jpg', tags: ['Warm','Floral'],   price: 'UGX 25,000' },
+      { name: 'Eucalyptus ',       file: 'img/IMG-20250813-WA0021.jpg', tags: ['Warm','Floral'],   price: 'UGX 25,000' },
+      { name: 'Citrus fresh',       file: 'img/IMG-20250813-WA0022.jpg', tags: ['Warm','Floral'],   price: 'UGX 20,000' },
+      { name: 'SPECIAL PACKAGE',       file: 'img/IMG-20250813-WA0023.jpg', tags: ['Warm','Floral'],   price: 'UGX 50,000' },
+      
+    ];
+
+    // QUOTES: randomly shown every few seconds
+    const quotes = [
+      'A candle loses nothing by lighting another candle. — James Keller',
+      'Thousands of candles can be lighted from a single candle. — Buddha',
+      'Better to light a candle than curse the darkness.',
+      'Where there is light, there must be a flame.',
+      'Home is where the candle burns the longest.',
+      'Let your light so shine — one wick at a time.',
+      'Small flame. Big mood. Cozy heart.',
+      'Scent is the memory that lingers after the light fades.',
+      'Spark joy, spark light — always OAK.',
+    ];
+
+    // ===========================
+    // Helpers
+    // ===========================
+    const $ = (sel, root=document) => root.querySelector(sel);
+    const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+
+    function formatPrice(p){ return p && String(p).trim() ? p : '—'; }
+
+    function waLinkFor(item){
+      const text = encodeURIComponent(`Hi OAK Candles! I\'m interested in: ${item.name}. Is it available?`);
+      return `https://wa.me/${WHATSAPP_NUMBER}?text=${text}`;
+    }
+
+    // ===========================
+    // Build Gallery
+    // ===========================
+    const grid = $('#grid');
+    let currentIndex = 0; // for lightbox
+
+    function makeCard(item, index){
+      const el = document.createElement('article');
+      el.className = 'card';
+      el.dataset.tags = item.tags.join(',');
+      el.innerHTML = `
+        <div class="thumb"><img src="${item.file}" alt="${item.name}" loading="lazy"></div>
+        <div class="meta">
+          <div class="name">${item.name}</div>
+          <div class="price">Price: <span>${formatPrice(item.price)}</span></div>
+        </div>
+        <div class="card-actions">
+          <span class="tag">${item.tags.join(' • ')}</span>
+          <a class="btn" href="${waLinkFor(item)}" target="_blank" rel="noopener">WhatsApp</a>
+        </div>`;
+
+      // Lightbox open on image click
+      el.querySelector('.thumb').addEventListener('click', () => openLightbox(index));
+      return el;
+    }
+
+    function build(){
+      grid.innerHTML = '';
+      candles.forEach((c, i)=> grid.appendChild(makeCard(c, i)));
+      revealObserve();
+    }
+
+    // ===========================
+    // Filters
+    // ===========================
+    function setFilter(filter){
+      $$('.chip').forEach(btn=> btn.setAttribute('aria-pressed', String(btn.dataset.filter === filter)));
+      $$('#grid .card').forEach(card => {
+        if(filter === 'all') card.classList.remove('hide');
+        else {
+          const tags = card.dataset.tags.split(',');
+          tags.includes(filter) ? card.classList.remove('hide') : card.classList.add('hide');
+        }
+      });
+    }
+
+    // ===========================
+    // Lightbox
+    // ===========================
+    const lightbox = $('#lightbox');
+    const lightboxImg = $('#lightboxImg');
+
+    function openLightbox(i){
+      currentIndex = i;
+      lightboxImg.src = candles[i].file;
+      lightbox.classList.add('open');
+    }
+    function closeLightbox(){ lightbox.classList.remove('open'); }
+    function nextImg(){ currentIndex = (currentIndex + 1) % candles.length; openLightbox(currentIndex); }
+    function prevImg(){ currentIndex = (currentIndex - 1 + candles.length) % candles.length; openLightbox(currentIndex); }
+
+    $('#closeLightbox').addEventListener('click', closeLightbox);
+    $('#nextImg').addEventListener('click', nextImg);
+    $('#prevImg').addEventListener('click', prevImg);
+    lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbox(); });
+
+    // ===========================
+    // Random Quotes Floater
+    // ===========================
+    const floater = $('#quoteFloater');
+    function cycleQuote(){
+      const q = quotes[Math.floor(Math.random()*quotes.length)];
+      floater.textContent = q;
+      floater.classList.add('show');
+      setTimeout(()=> floater.classList.remove('show'), 6000); // visible for 6s
+    }
+
+    // ===========================
+    // Theme Toggle
+    // ===========================
+    const themeBtn = $('#themeToggle');
+    function setTheme(mode){ document.documentElement.setAttribute('data-theme', mode); localStorage.setItem('oak_theme', mode); }
+    function toggleTheme(){ const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light'; setTheme(cur); }
+    themeBtn.addEventListener('click', toggleTheme);
+    (function initTheme(){ const saved = localStorage.getItem('oak_theme') || 'dark'; setTheme(saved); })();
+
+    // ===========================
+    // Scroll progress & Reveal
+    // ===========================
+    const progress = $('#progress');
+    function onScroll(){
+      const sTop = window.scrollY; const docH = document.body.scrollHeight - innerHeight; const p = (sTop/docH)*100; progress.style.width = p + '%';
+    }
+    window.addEventListener('scroll', onScroll, {passive:true});
+
+    function revealObserve(){
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('revealed'); io.unobserve(e.target); } });
+      }, {rootMargin: '0px 0px -10% 0px'});
+      $$('#grid .card').forEach(c=> io.observe(c));
+    }
+
+    // ===========================
+    // Contact Links
+    // ===========================
+    const waGlobal = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi OAK Candles! I\'d love to order.')}`;
+    $('#waLink').href = waGlobal;
+    $('#whatsCTA').href = waGlobal;
+    $('#fab').href = waGlobal;
+    $('#igLink').href = INSTAGRAM_URL;
+
+    // ===========================
+    // Filters events
+    // ===========================
+    $$('.chip').forEach(btn=> btn.addEventListener('click', ()=> setFilter(btn.dataset.filter)));
+
+    // ===========================
+    // Init
+    // ===========================
+    document.getElementById('year').textContent = new Date().getFullYear();
+    build();
+    setFilter('all');
+    onScroll();
+
+    // start quotes
+    cycleQuote();
+    setInterval(cycleQuote, 12000); // every 12s
+  </script>
+</body>
+</html>
